@@ -30,19 +30,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
 
 public class MobileChallenge {
-	AndroidDriver driver;
-	Properties properties;
+	private AndroidDriver driver;
+	private Properties properties;
 
-	
-  @Test (priority = 0)
+// Test Step 1: Login to app -> verify user has been login to app -> navigae back to main activity	
+  @Test (priority = 1)
   public void test1() throws IOException {
-	  
-	  try {
-		Thread.sleep(20000);
-	} catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+	
+	driver.manage().timeouts().implicitlyWait(30,TimeUnit.SECONDS); 
 	
 	  properties = readProperties();
 	  String email = properties.getProperty("email");
@@ -75,8 +70,9 @@ public class MobileChallenge {
 	  driver.findElement(By.id("iv_logo")).click();	  
   }
   
-
+//Method to verify image presence
   public boolean verifyImagePresence(WebElement imageElement) {
+	  // this method can be used to verify image presence
 	  Boolean ImagePresent = false;
 	  Dimension size = imageElement.getSize();
 	  System.out.println(size);
@@ -91,20 +87,22 @@ public class MobileChallenge {
 	  
   }
   
-  @Test
-  public void test2() {
+  /*Test Step 2: wait until latest link appear -> navigate to latest link -> 
+   *-> click on main article ->verify image presence -> verify video presence 
+   */
+  @Test (priority = 2)
+  public void test2() {	
+	  //wait until the latest link appear
+	  String xpath_latestLink = "/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.support.v4.widget.DrawerLayout/android.widget.RelativeLayout/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.HorizontalScrollView/android.widget.LinearLayout/android.support.v7.app.ActionBar.Tab[3]/android.widget.LinearLayout/android.widget.TextView";
 	  
-	  
-	  try {
-		Thread.sleep(20000);
-	} catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+	  WebDriverWait wait = new WebDriverWait(driver,20);
+	  wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath_latestLink)));
 
+	  //click on latest link 
 	  driver.findElement(By.xpath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.support.v4.widget.DrawerLayout/android.widget.RelativeLayout/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.HorizontalScrollView/android.widget.LinearLayout/android.support.v7.app.ActionBar.Tab[3]/android.widget.LinearLayout/android.widget.TextView")).click();
 	  WebElement e = driver.findElement(By.xpath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.support.v4.widget.DrawerLayout/android.widget.RelativeLayout/android.widget.FrameLayout/android.widget.RelativeLayout/android.support.v4.view.ViewPager/android.widget.RelativeLayout/android.view.ViewGroup/android.support.v7.widget.RecyclerView/android.widget.LinearLayout[1]/android.widget.LinearLayout/android.widget.LinearLayout/android.widget.TextView"));
 	 
+	  //verify article image presence
 	  WebElement imageElement = driver.findElement(By.id("article_image"));
 	  
 	  if (imageElement !=null) {
@@ -114,6 +112,7 @@ public class MobileChallenge {
 		  System.out.println("Image not Available");
 	  }
 	  
+	  //verify video presence
 	  WebElement videoPlayButton = driver.findElement(By.id("iv_video_play"));
 	  
 	  if (videoPlayButton !=null) {
@@ -125,9 +124,10 @@ public class MobileChallenge {
 	  
   }
   
+  //launch app 
   @BeforeTest
   public void beforeTest() {
-	  //Setup desired capabilites, pass appActivity and appPackage to appium
+	  //Setup desired capabilities, pass appActivity and appPackage to appium
 	  DesiredCapabilities capabilities = new DesiredCapabilities();
 	  
 	  capabilities.setCapability( "platformName", "android");
@@ -136,30 +136,28 @@ public class MobileChallenge {
 	  capabilities.setCapability( "appPackage", "com.buuuk.st");
 	  capabilities.setCapability( "noReset", true);
 	  
-	  //driver = new AndroidDriver<WebElement> (new URL ("http://127.0.0.1:4723/wd/hub"), capabilities);
 		//Instantiate Appium Driver
 		try {
-			 driver = new AndroidDriver(new URL("http://0.0.0.0:4723/wd/hub"), capabilities);
-			
+			 driver = new AndroidDriver(new URL("http://0.0.0.0:4723/wd/hub"), capabilities);		
 		} catch (MalformedURLException e) {
 			System.out.println(e.getMessage());
 		}
-		
-
-		
-
   }
   
+  // Reads the test case properties from properties file
   public Properties readProperties() throws IOException {
-	  //this method can be used to read testcondtion values from config.properties file
+	  //this method can be used to read test condition values from config.properties file
 	  properties = new Properties();
 	  FileInputStream ip = new FileInputStream("/Users/nilmi/Documents/SPH/WebChallenge/src/test/java/CodeChallenge/WebChallenge/config.properties");
 	  properties.load(ip);
 	  return properties;
   }
 
+  //this section executes after test
   @AfterTest
   public void afterTest() {
+	  //quit driver after test
+	  driver.quit();
   }
 
 }
